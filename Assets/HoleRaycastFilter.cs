@@ -1,25 +1,29 @@
-﻿using UnityEngine;
+﻿// HoleRaycastFilter.cs
+using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Image))]
 public class HoleRaycastFilter : MonoBehaviour, ICanvasRaycastFilter
 {
-    public RectTransform ClickZone; // vùng được phép click (ví dụ nút Play)
+    [SerializeField] private bool debugLogs = false;
+
+    private RaycastHole _raycastHole = new RaycastHole();
 
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
-        if (ClickZone == null) return true;
+        bool valid = _raycastHole.IsRaycastLocationValid(screenPoint, eventCamera);
 
-        
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            ClickZone, screenPoint, eventCamera, out localPoint
-        );
+        if (debugLogs)
+        {
+            // debug: in ra trạng thái và vị trí, helpful để kiểm tra xem hàm đang trả true/false như nào
+            Debug.Log($"HoleRaycastFilter.IsRaycastLocationValid -> {valid} (screenPoint={screenPoint}, cam={(eventCamera == null ? "null" : eventCamera.name)})");
+        }
 
-
-        if (ClickZone.rect.Contains(localPoint))
-            return false;
-        else
-            return true; 
+        return valid;
     }
+
+    // Public API để HighLightImage hay class khác set zone
+    public void SetClickZone(RectTransform clickZone) => _raycastHole.SetClickZone(clickZone);
+    public void SetClickZoneFromTarget(GameObject target) => _raycastHole.SetClickZoneFromTarget(target);
+    public void ClearClickZone() => _raycastHole.ClearClickZone();
 }
